@@ -8,6 +8,7 @@ import os
 import braille
 import brailleInput
 import brailleTranslation
+import brailleTables
 from logHandler import log
 import config
 import globalVars
@@ -30,7 +31,7 @@ class LibLouisWrapper(brailleTranslation.BrailleTranslationProvider):
 			"""
 			mode |= louis.ucBrl | louis.noUndefinedDots 
 			if  issubclass(self.brailleInputHandler.__class__, NoneType):
-				table = brailleInput.FALLBACK_TABLE
+				table = brailleTables.getTable(brailleInput.FALLBACK_TABLE)
 				log.info("backTranslate: Defaulting to brailleInput.FALLBACK_TABLE")
 				self.brailleInputHandler = brailleInput.handler
 
@@ -52,7 +53,7 @@ class LibLouisWrapper(brailleTranslation.BrailleTranslationProvider):
 			"""
 			mode |= louis.dotsIO
 			if  issubclass(self.brailleDisplayHandler.__class__, NoneType):
-				table = braille.FALLBACK_TABLE
+				table = brailleTables.getTable(braille.FALLBACK_TABLE)
 				log.info("Defaulting to braille.FALLBACK_TABLE")
 				self.brailleDisplayHandler = braille.handler
 
@@ -70,7 +71,7 @@ class LibLouisWrapper(brailleTranslation.BrailleTranslationProvider):
 
 			#forward translation, but using the table from the BrailleINPUT
 			if  issubclass(self.brailleInputHandler.__class__, NoneType):
-				table = brailleInput.FALLBACK_TABLE
+				table = brailleTables.getTable(brailleInput.FALLBACK_TABLE)
 				log.info("translateInGradeForEntry: Defaulting to brailleInput.FALLBACK_TABLE")
 				self.brailleInputHandler = brailleInput.handler
 

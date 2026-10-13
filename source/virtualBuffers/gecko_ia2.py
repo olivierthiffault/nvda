@@ -1,3 +1,6 @@
+# This file was modified for the BrailleNote evolve
+# Technologies Humanware 2026
+
 # A part of NonVisual Desktop Access (NVDA)
 # This file is covered by the GNU General Public License.
 # See the file COPYING for more details.
@@ -17,6 +20,7 @@ import controlTypes
 import NVDAObjects.IAccessible.mozilla
 import NVDAObjects.behaviors
 import winUser
+import mouseHandler
 import IAccessibleHandler
 import oleacc
 from logHandler import log
@@ -373,6 +377,33 @@ class Gecko_ia2(VirtualBuffer):
 		ID = int(controlField["controlIdentifier_ID"])
 		obj = self.getNVDAObjectFromIdentifier(docHandle, ID)
 		obj.doAction(index)
+
+	def _activateNVDAObject(self, obj):
+		"""Prefer physical mouse simulation over IAccessible2 doAction for located elements.
+
+		IAccessible2 doAction fires only a synthetic click event via the accessibility API.
+		Some web applications (e.g. React-based UIs) attach handlers to mousedown or
+		pointerdown events rather than click, and therefore do not respond to doAction.
+		A physical mouse click fires the complete pointer event sequence and is therefore
+		attempted first for any element that has a known screen location.
+		For off-screen or locationless elements, falls back to doAction.
+		"""
+		while obj and obj != self.rootNVDAObject:
+			if not obj.hasIrrelevantLocation:
+				location = obj.location
+				if location and location.width and location.height:
+					oldX, oldY = winUser.getCursorPos()
+					winUser.setCursorPos(*location.center)
+					mouseHandler.doPrimaryClick()
+					winUser.setCursorPos(oldX, oldY)
+					return
+			# No valid on-screen location; fall back to the IAccessible2 accessibility action.
+			try:
+				obj.doAction()
+				return
+			except NotImplementedError:
+				log.debugWarning("doAction failed")
+			obj = obj.parent
 
 	def _searchableTagValues(self, values):
 		return values

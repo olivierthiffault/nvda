@@ -20601,7 +20601,7 @@ msgstr "Conto parole"
 #: gui\settingsDialogs.py:2885
 msgctxt "math"
 msgid "Use native math speech in Word and Outlook"
-msgstr ""
+msgstr "Utilizza la sintesi vocale matematica nativa in Word e Outlook"
 
 #. Translators: Description for a Screen Curtain setting that shows a warning when loading
 #. the screen curtain.

@@ -580,6 +580,8 @@ class HumanwareCommands(ScriptableObject):
 		humanware.emulateGesture("windows+i")
 
 	@script(
+		# Translators: Input help message for Toggle Keyboard Layout command.
+		description=_("Toggle Keyboard Layout shortcut"),
 		gesture=("br(hidBrailleStandard):space+dot2+dot4+dot7+dot8"),	# Backspace+Enter+I
 	)
 	def script_toggleKeyboardLayoutShortcut(self, gesture):

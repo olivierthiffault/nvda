@@ -2345,7 +2345,14 @@ def getFocusContextRegions(
 
 	focusToHardLeftSet = False
 	for index, parent in enumerate(ancestors[newAncestorsStart:ancestorsEnd], newAncestorsStart):
-		if not parent.isPresentableFocusAncestor:
+		try:
+			if not parent.isPresentableFocusAncestor:
+				continue
+		except Exception:
+			log.debugWarning(
+				f"Error checking isPresentableFocusAncestor for {parent!r}, skipping ancestor",
+				exc_info=True,
+			)
 			continue
 		region = NVDAObjectRegion(parent, appendText=TEXT_SEPARATOR)
 		region._focusAncestorIndex = index

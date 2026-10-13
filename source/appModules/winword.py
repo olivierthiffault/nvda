@@ -308,24 +308,9 @@ class AppModule(appModuleHandler.AppModule):
 	)
 	def script_braille_insert_equation_to_document_or_insert_edit_equation(self, gesture):
 		#Select the appropriate action depending if we are in expression editor or in document
-		if self._isWordExpressionEditor():
-			humanware.emulateKeyPress("enter")
-		else:
-			kbIdentifier = self.getShortcutFromCommandName("insertOrEditEquation")
-			humanware.emulateKeyPress(kbIdentifier)
-
-	@script(
-		# Translators: Input Help message for the complete MathML entry command.
-		description=_("Complete MathML entry"),
-		gesture="br(hidBrailleStandard):dot8" #Enter
-	)
-	def script_braille_complete_mathml_entry(self, gesture):
-		if self._isWordExpressionEditor():
-			kbIdentifier = self.getShortcutFromCommandName("completeMathMLEntry")
-			humanware.emulateKeyPress(kbIdentifier)
-		else:
-			brailleInput.handler.enter()
-
+		command = "insertAndAddNewEquation" if self._isWordExpressionEditor() else "insertOrEditEquation"
+		kbIdentifier = self.getShortcutFromCommandName(command)
+		humanware.emulateKeyPress(kbIdentifier)
 
 	@script(
 		# Translators: Input Help message for the insert braille symbol command.
@@ -675,7 +660,6 @@ class WinwordWordDocument(WordDocument):
 
 		# Add extra delay after Alt if in document (needed for menu to appear)
 		delayAfterAlt = 0.5 if focus and focus.role == controlTypes.Role.DOCUMENT else 0.0
-		
 		# Use the locale-specific key sequence from gesturesFromCommandName.ini
 		# English: "alt,m,l" / German: "alt,y,2,l"
 		humanware.emulateKeySequenceFromCommandName(self, "openMenuListKeys", delayAfterAlt=delayAfterAlt)

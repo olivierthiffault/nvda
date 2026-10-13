@@ -1,3 +1,6 @@
+# This file was modified for the BrailleNote evolve
+# Technologies Humanware 2026
+
 # A part of NonVisual Desktop Access (NVDA)
 # Copyright (C) 2011-2021 NV Access Limited
 # This file is covered by the GNU General Public License.
@@ -131,21 +134,27 @@ class WebKit(VirtualBuffer):
 		return attrs
 
 	def _activateNVDAObject(self, obj):
+		"""Prefer physical mouse simulation over doAction for located elements.
+
+		doAction fires only a synthetic click event, but some web applications
+		attach handlers to mousedown/pointerdown rather than click.
+		A physical mouse click fires the complete pointer event sequence and is
+		therefore attempted first for elements with a known screen location.
+		"""
+		if not obj.hasIrrelevantLocation:
+			l = obj.location  # noqa: E741
+			if l and l.width and l.height:
+				oldX, oldY = winUser.getCursorPos()
+				winUser.setCursorPos(*l.center)
+				mouseHandler.doPrimaryClick()
+				winUser.setCursorPos(oldX, oldY)
+				return
+
+		log.debugWarning("No valid location for object, trying doAction")
 		try:
 			obj.doAction()
-			return
-		except:  # noqa: E722
-			pass
-
-		log.debugWarning("could not programmatically activate field, trying mouse")
-		l = obj.location  # noqa: E741
-		if not l:
-			log.debugWarning("no location for field")
-			return
-		oldX, oldY = winUser.getCursorPos()
-		winUser.setCursorPos(*l.center)
-		mouseHandler.doPrimaryClick()
-		winUser.setCursorPos(oldX, oldY)
+		except Exception:  # noqa: E722
+			log.debugWarning("doAction also failed")
 
 	def _shouldSetFocusToObj(self, obj):
 		return obj.role != controlTypes.Role.GROUPING and super(WebKit, self)._shouldSetFocusToObj(obj)

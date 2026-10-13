@@ -1956,10 +1956,16 @@ class UIA(Window):
 			hasKeyboardFocus = False
 		if hasKeyboardFocus:
 			states.add(controlTypes.State.FOCUSED)
-		if self._getUIACacheablePropertyValue(UIAHandler.UIA_IsKeyboardFocusablePropertyId):
-			states.add(controlTypes.State.FOCUSABLE)
-		if self._getUIACacheablePropertyValue(UIAHandler.UIA_IsPasswordPropertyId):
-			states.add(controlTypes.State.PROTECTED)
+		try:
+			if self._getUIACacheablePropertyValue(UIAHandler.UIA_IsKeyboardFocusablePropertyId):
+				states.add(controlTypes.State.FOCUSABLE)
+		except COMError:
+			pass
+		try:
+			if self._getUIACacheablePropertyValue(UIAHandler.UIA_IsPasswordPropertyId):
+				states.add(controlTypes.State.PROTECTED)
+		except COMError:
+			pass
 		# Don't fetch the role unless we must, but never fetch it more than once.
 		role = None
 		if self._getUIACacheablePropertyValue(UIAHandler.UIA_IsSelectionItemPatternAvailablePropertyId):

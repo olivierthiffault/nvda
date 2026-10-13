@@ -214,6 +214,10 @@ class BrailleInputHandler(AutoPropertyObject):
 				ui.message(_("Native Braille off"))
 		log.info("Native Braille %s" %self.nativeBrailleRequired )
 
+		#let the Perkins QWERTY emulator know whether it should translate the home row into cells
+		if perkinsQwertyEmulator is not None:
+			perkinsQwertyEmulator.setNativeBrailleInputRequired(active)
+
 
 	def _onInputLangChanged(self, threadID: int, hkl: int, layoutString: str):
 		"""Called when the active input language or method changes.
@@ -862,15 +866,30 @@ class BrailleInputHandler(AutoPropertyObject):
 handler: Optional[BrailleInputHandler] = None
 
 
+
+perkinsQwertyEmulator = None
+
+
 def initialize():
-	global handler
+	global handler, perkinsQwertyEmulator
 	handler = BrailleInputHandler()
+
+	try:
+		from _perkinsQwerty import emulator  # type: ignore  # dynamically added to sys.path
+
+		perkinsQwertyEmulator = emulator
+	except ImportError:
+		perkinsQwertyEmulator = None
+		log.warning("Failed to import _perkinsQwerty.emulator, braille input may not work correctly.")
+
 	treeInterceptorHandler.post_browseModeStateChange.register(handler._onBrowseModeStateChange)
 	log.info("Braille input initialized")
 
 
 def terminate():
 	global handler
+	if perkinsQwertyEmulator is not None:
+		perkinsQwertyEmulator.setSuspended(True)
 	if handler is not None:
 		NVDAHelper.inputLangChanged.unregister(handler._onInputLangChanged)
 		treeInterceptorHandler.post_browseModeStateChange.unregister(handler._onBrowseModeStateChange)
